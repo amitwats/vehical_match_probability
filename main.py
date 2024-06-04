@@ -104,7 +104,8 @@ class MetaDataHolder:
         )
 
 
-    def calculate_all_make_scores(self, vehicle_description, params):
+
+    def calculate_all_scores(self, vehicle_description, params):
         # nlp = spacy.load("en_core_web_lg")
         doc = nlp(vehicle_description)
         scores = []
@@ -118,42 +119,40 @@ class MetaDataHolder:
                 score.add_match_score(token.text,similariity_score, token.dep_)
         return scores
 
-    def get_possible_make_scores(self,vehicle_description):
+    def get_possible_scores(self,vehicle_description,param_type):
         # scores=self.calculate_all_make_scores(input,md.makes)
-        scores=self.calculate_all_make_scores(vehicle_description,md.makes)
-        input_make_score={}
+        param_mapping={ "make": md.makes,
+                        "model":md.models, 
+                       "badge":self.badges, 
+                       "transmission_type": self.transmission_types, 
+                       "fuel_type": self.fuel_types, 
+                       "drive_type": self.drive_types}
+
+        exclude_description_mapping={ "make":["pobj"], 
+                        "model":[], 
+                       "badge":[], 
+                       "transmission_type": [], 
+                       "fuel_type": [], 
+                       "drive_type": []}
+
+        threshold_mapping={ "make":0.75, 
+                        "model":0.75, 
+                       "badge":0.75, 
+                       "transmission_type": 0.75, 
+                       "fuel_type": 0.75, 
+                       "drive_type": 0.75
+                       }
+
+
+        scores=self.calculate_all_scores(vehicle_description,param_mapping[param_type])
+        input_score={}
         for score in scores:
-            higher_scores=score.get_match_score_filtered(.75,["pobj"])
+            higher_scores=score.get_match_score_filtered(threshold_mapping[param_type],exclude_description_mapping[param_type])
             for ms in higher_scores:
-                print(ms)
-                input_make_score[ms.compare_str]=ms.similarity_score
+                # print(ms)
+                input_score[ms.compare_str]=ms.similarity_score
         
-        return input_make_score
-
-    # def calculate_make_score(self, vehicle_description, params, threshold=0.75):
-    #     nlp = spacy.load("en_core_web_lg")
-    #     doc = nlp(vehicle_description)
-    #     scores = {}
-
-    #     for param in params:
-    #         scores[param]={}
-    #         param_doc = nlp(param)
-    #         best_score = 0
-
-    #         for token in doc:
-    #             score = param_doc.similarity(nlp(token.text))
-                
-    #             if score > best_score:
-    #                 best_score = score
-    #             # print(f"The token -{token.text}- has a dependency oof {token.dep_}")
-    #             # print(f"The token -{token.text}- has ancestor of {token.is_ancestor}")
-
-    #         # print(f"The best score is {best_score}")
-    #         scores[param]["score"]= best_score
-    #         scores[param]["dependency"]= token.dep_
-
-
-    #     return scores
+        return input_score
 
 
 def read_file_to_list(file_path):
@@ -192,8 +191,7 @@ def execute_query(conn, query):
         return result
 
 if __name__ == '__main__':
-    # Run the function to fetch and print vehicle data
-    # fetch_vehicle_data()
+
     res=execute_query("select * from autograb_schema.vehicle limit 5")
     md=MetaDataHolder()
     
@@ -206,15 +204,18 @@ if __name__ == '__main__':
 
     inputs=read_file_to_list("input.txt")
 
-    # print(inputs)
-    # print(md.calculate_make_scores(inputs[3],md.makes))
+
     input_make_score={}
     for input in inputs:
-        input_make_score[input]=md.get_possible_make_scores(input)
+        input_make_score[input]={}
+        input_make_score[input]["make"]=md.get_possible_scores(input, "make")
+        input_make_score[input]["model"]=md.get_possible_scores(input, "model")
+        input_make_score[input]["badge"]=md.get_possible_scores(input, "badge")
+        input_make_score[input]["transmission_type"]=md.get_possible_scores(input, "transmission_type")
+        input_make_score[input]["fuel_type"]=md.get_possible_scores(input, "fuel_type")
+        input_make_score[input]["drive_type"]=md.get_possible_scores(input, "drive_type")
         
-        
-        
-        
+      
         # scores=md.calculate_all_make_scores(input,md.makes)
         # input_make_score[input]={}
         # # print(len(scores))
