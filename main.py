@@ -147,22 +147,21 @@ class MetaDataHolder:
 
         threshold_mapping={ "make":0.75, 
                         "model":0.75, 
-                       "badge":0.75, 
+                       "badge":0.6, 
                        "transmission_type": 0.75, 
                        "fuel_type": 0.75, 
                        "drive_type": 0.75
                        }
 
 
-        scores=self.calculate_all_scores(vehicle_description,param_mapping[param_type])
-        if param_type=="model":
-            print(f"The scores are -{scores}-")
+        scores:list[Score]=self.calculate_all_scores(vehicle_description,param_mapping[param_type])
         input_score={}
         for score in scores:
+
             higher_scores=score.get_match_score_filtered(threshold_mapping[param_type],exclude_description_mapping[param_type])
             for ms in higher_scores:
                 # print(ms)
-                input_score[ms.compare_str]=math.abs(ms.similarity_score)
+                input_score[ms.compare_str]=ms.similarity_score
         if len(input_score)==0:
             input_score={"-":0}
         
@@ -315,7 +314,6 @@ if __name__ == '__main__':
         vehicle_df['drive_type']
 
     for input in inputs:
-        print(f"Processing -{input}-")
         input_make_score[input]={}
         input_make_score[input]["make"]=md.get_possible_scores(input, "make")
         input_make_score[input]["model"]=md.get_possible_scores(input, "model")
@@ -374,10 +372,7 @@ if __name__ == '__main__':
         #         ) , axis=1)
         #     possible_combinations_grouped_df=possible_combinations_df.groupby(["make", "model", "badge", "transmission_type", "fuel_type", "drive_type"], as_index=False)['weighted_average'].max()
         #     possible_combinations_grouped_df['input']=input_name
-        print(input_make_score[input])
-        print("*"*20)
-        print(input_make_score[input])
-        print("="*20)
+
 
         possible_combinations_df=get_all_combination_dataframe(input_make_score[input])
         # print(f"Possible combination count {possible_combinations_df.shape[0]}")
@@ -414,18 +409,12 @@ if __name__ == '__main__':
             v_df["match_score"]=0
             possible_combinations_grouped_df['all_params']= possible_combinations_grouped_df.apply(lambda row: get_non_hyphen_values(row), axis=1)
             # go through every row of possible_combinations_grouped_df
-            print(f"The size is {possible_combinations_grouped_df.shape[0]}")
-            print(f"The possible_comb is {possible_combinations_grouped_df['all_params']}")
 
             # print(len(possible_combinations_grouped_df))
 
             for index, row_possible_combinations_grouped_df in possible_combinations_grouped_df.iterrows():
-                # print(f"Working on -{row_possible_combinations_grouped_df['all_params']}-")
-                v_df.to_csv("vf_dump.csv",index=False)
-                print(f"The fuzz is {row_possible_combinations_grouped_df['all_params']}")
                 v_df["match_score"]=\
-                    v_df.apply(lambda row: fuzz.ratio(row['all_params'], row_possible_combinations_grouped_df['all_params']), axis=1)
-                v_df.to_csv("vf_dump_after.csv",index=False)
+                    v_df.apply(lambda row: fuzz.ratio(row['all_params'], row_possible_combinations_grouped_df['all_params']), axis=1)/100
                 
                 top_result=v_df.sort_values(by="match_score", ascending=False).iloc[[0]]
                 top_result['input']=input
@@ -445,9 +434,7 @@ if __name__ == '__main__':
         
         
         if merged_df.shape[0]>1: # more than one row did match
-            print(f"More than one found for {input}")
             merged_df=get_max_listing_df(merged_df,listings_df)
-        print(f"Merged DF count {merged_df.shape[0]}")
         
         
         if master_df is None: # first time populating
