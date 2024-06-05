@@ -16,6 +16,9 @@ from thefuzz import fuzz
 from thefuzz import process
 import spacy
 
+import pandas as pd
+import itertools
+
 # Database connection parameters
 db_host = "localhost"  # or the IP address of your PostgreSQL server
 db_port = 5432  # Default port for PostgreSQL
@@ -151,6 +154,8 @@ class MetaDataHolder:
             for ms in higher_scores:
                 # print(ms)
                 input_score[ms.compare_str]=ms.similarity_score
+        if len(input_score)==0:
+            input_score={"-":0}
         
         return input_score
 
@@ -190,6 +195,52 @@ def execute_query(conn, query):
         result = [row[0] for row in result]
         return result
 
+def get_dataframe(data):
+    # data = {
+    #     "make": {"Volkswagen": 1.0},
+    #     "model": {"Golf": 1.0},
+    #     "badge": {
+    #         "132TSI Comfortline Allspace": 0.8769095459110375,
+    #         "110TSI Comfortline": 0.9999999713304009,
+    #         "132TSI Comfortline": 0.9999999713304009,
+    #         "110TSI Comfortline Allspace": 0.8769095459110375
+    #     },
+    #     "transmission_type": {"Automatic": 1.0},
+    #     "fuel_type": {"Petrol": 1.0},
+    #     "drive_type": {
+    #         "Rear Wheel Drive": 0.8150659445886941,
+    #         "Front Wheel Drive": 0.7666825475513469
+    #     }
+    # }
+
+    # Generate all permutations of the data
+    permutations = list(itertools.product(
+        data["make"].items(),
+        data["model"].items(),
+        data["badge"].items(),
+        data["transmission_type"].items(),
+        data["fuel_type"].items(),
+        data["drive_type"].items()
+    ))
+
+    # Prepare the DataFrame
+    rows = []
+    for perm in permutations:
+        row = {
+            "make": perm[0][0], "make_value": perm[0][1],
+            "model": perm[1][0], "model_value": perm[1][1],
+            "badge": perm[2][0], "badge_value": perm[2][1],
+            "transmission_type": perm[3][0], "transmission_type_value": perm[3][1],
+            "fuel_type": perm[4][0], "fuel_type_value": perm[4][1],
+            "drive_type": perm[5][0], "drive_type_value": perm[5][1]
+        }
+        rows.append(row)
+
+    # Create the DataFrame
+    df = pd.DataFrame(rows)
+    return df
+
+
 if __name__ == '__main__':
 
     res=execute_query("select * from autograb_schema.vehicle limit 5")
@@ -206,16 +257,25 @@ if __name__ == '__main__':
 
 
     input_make_score={}
-    for input in inputs:
-        input_make_score[input]={}
-        input_make_score[input]["make"]=md.get_possible_scores(input, "make")
-        input_make_score[input]["model"]=md.get_possible_scores(input, "model")
-        input_make_score[input]["badge"]=md.get_possible_scores(input, "badge")
-        input_make_score[input]["transmission_type"]=md.get_possible_scores(input, "transmission_type")
-        input_make_score[input]["fuel_type"]=md.get_possible_scores(input, "fuel_type")
-        input_make_score[input]["drive_type"]=md.get_possible_scores(input, "drive_type")
+    # for input in inputs:
+    #     input_make_score[input]={}
+    #     input_make_score[input]["make"]=md.get_possible_scores(input, "make")
+    #     input_make_score[input]["model"]=md.get_possible_scores(input, "model")
+    #     input_make_score[input]["badge"]=md.get_possible_scores(input, "badge")
+    #     input_make_score[input]["transmission_type"]=md.get_possible_scores(input, "transmission_type")
+    #     input_make_score[input]["fuel_type"]=md.get_possible_scores(input, "fuel_type")
+    #     input_make_score[input]["drive_type"]=md.get_possible_scores(input, "drive_type")
+    #     break
         
-      
+    input_make_score={}
+    input=inputs[0]
+    input_make_score[input]={}
+    input_make_score[input]["make"]=md.get_possible_scores(input, "make")
+    input_make_score[input]["model"]=md.get_possible_scores(input, "model")
+    input_make_score[input]["badge"]=md.get_possible_scores(input, "badge")
+    input_make_score[input]["transmission_type"]=md.get_possible_scores(input, "transmission_type")
+    input_make_score[input]["fuel_type"]=md.get_possible_scores(input, "fuel_type")
+    input_make_score[input]["drive_type"]=md.get_possible_scores(input, "drive_type")
         # scores=md.calculate_all_make_scores(input,md.makes)
         # input_make_score[input]={}
         # # print(len(scores))
@@ -230,7 +290,37 @@ if __name__ == '__main__':
         #     #     input_make_score
         #     #     print(higher_scores)
 
-    print(input_make_score)
+    weitage={
+        "make": 0.2,
+        "model":0.4, 
+        "badge":0.05, 
+        "transmission_type": 0.2, 
+        "fuel_type": 0.1, 
+        "drive_type": 0.05
+    }
+
+
+    for key, value in input_make_score.items():
+        print(key)
+        print(value)
+        df=get_dataframe(value)
+        df['input']=key
+        df['weighted_average'] = df.apply(lambda row: (
+            row['make_value'] * weitage['make'] +
+            row['model_value'] * weitage['model'] +
+            row['badge_value'] * weitage['badge'] +
+            row['transmission_type_value'] * weitage['transmission_type'] +
+            row['fuel_type_value'] * weitage['fuel_type'] +
+            row['drive_type_value'] * weitage['drive_type']
+            ) , axis=1)
+        df_grouped=df.groupby(["make", "model", "badge", "transmission_type", "fuel_type", "drive_type"], as_index=False)['weighted_average'].max()
+        print(df)
+        print(df_grouped)
+
+        # for key_inner, value_inner in value.items():
+        #     print(f"{key_inner}: {value_inner}")
+
+    # print(input_make_score)
 
     # print(type(res))
     # print(md)
