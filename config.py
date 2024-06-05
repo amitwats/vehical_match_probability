@@ -1,6 +1,16 @@
+
+
+########################################################
+# *************** IMPORTANT   **************************
+########################################################
+# The username, and password is mentioned here
+# as its a local docker run
+# in a more serious enviornment more secure mechanisms
+# like loading it in environment variables or
+# storing it in a KMS is recommended
+########################################################
+
 # Database connection parameters
-
-
 db_host = "localhost"  # or the IP address of your PostgreSQL server
 db_port = 5432  # Default port for PostgreSQL
 db_name = "autograb_db"
