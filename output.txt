@@ -1,0 +1,68 @@
+Input: Volkswagen Golf 110TSI Comfortline Petrol Automatic Front Wheel Drive
+Vehicle ID: 4749339721203712
+Confidence: 9.9
+
+Input: Volkswagen Golf 132TSI Automatic
+Vehicle ID: 4628393442148352
+Confidence: 7.0
+
+Input: Volkswagen Golf Alltrack 132TSI
+Vehicle ID: 5734502139691008
+Confidence: 6.5
+
+Input: VW Golf R with engine swap from Toyota 86 GT
+Vehicle ID: 5811435875598336
+Confidence: 6.1
+
+Input: Golf GTI
+Vehicle ID: 4628393442148352
+Confidence: 2.6
+
+Input: VW tiguan 162tsi allspace
+Vehicle ID: 4628393442148352
+Confidence: 4.1
+
+Input: R-Line Tiguan
+Vehicle ID: 5811435875598336
+Confidence: 6.3
+
+Input: VW Amarok Ultimate
+Vehicle ID: 4951649860714496
+Confidence: 6.6
+
+Input: Amrok h/line 4x4
+Vehicle ID: 5149400045191168
+Confidence: 1.1
+
+Input: RAV4 GX 4x4
+Vehicle ID: 4506798421704704
+Confidence: 4.7
+
+Input: Toyota Camry Hybrid
+Vehicle ID: 5149400045191168
+Confidence: 4.6
+
+Input: Toyota 86 GT Manual Petrol RWD
+Vehicle ID: 5308573789716480
+Confidence: 7.6
+
+Input: Toyota 86 GTS Apollo Manual
+Vehicle ID: 4506798421704704
+Confidence: 6.3
+
+Input: Toyota 86 GTS Auto
+Vehicle ID: 4506798421704704
+Confidence: 4.7
+
+Input: Toyota Ascent Sports Hybrid
+Vehicle ID: 5324352224493568
+Confidence: 5.9
+
+Input: Toyota Kluger Black E/d 4WD
+Vehicle ID: 5387024387276800
+Confidence: 6.1
+
+Input: Toyota Kluger Black E/d 4WD
+Vehicle ID: 5387024387276800
+Confidence: 6.1
+
