@@ -62,7 +62,3 @@ Input: Toyota Kluger Black E/d 4WD
 Vehicle ID: 5387024387276800
 Confidence: 6.1
 
-Input: Toyota Kluger Black E/d 4WD
-Vehicle ID: 5387024387276800
-Confidence: 6.1
-
