@@ -19,7 +19,7 @@ import spacy
 import pandas as pd
 import itertools
 from sqlalchemy import create_engine
-
+import math 
 import warnings
 
 # Ignore all warnings
@@ -155,12 +155,14 @@ class MetaDataHolder:
 
 
         scores=self.calculate_all_scores(vehicle_description,param_mapping[param_type])
+        if param_type=="model":
+            print(f"The scores are -{scores}-")
         input_score={}
         for score in scores:
             higher_scores=score.get_match_score_filtered(threshold_mapping[param_type],exclude_description_mapping[param_type])
             for ms in higher_scores:
                 # print(ms)
-                input_score[ms.compare_str]=ms.similarity_score
+                input_score[ms.compare_str]=math.abs(ms.similarity_score)
         if len(input_score)==0:
             input_score={"-":0}
         
@@ -372,6 +374,10 @@ if __name__ == '__main__':
         #         ) , axis=1)
         #     possible_combinations_grouped_df=possible_combinations_df.groupby(["make", "model", "badge", "transmission_type", "fuel_type", "drive_type"], as_index=False)['weighted_average'].max()
         #     possible_combinations_grouped_df['input']=input_name
+        print(input_make_score[input])
+        print("*"*20)
+        print(input_make_score[input])
+        print("="*20)
 
         possible_combinations_df=get_all_combination_dataframe(input_make_score[input])
         # print(f"Possible combination count {possible_combinations_df.shape[0]}")
@@ -408,13 +414,18 @@ if __name__ == '__main__':
             v_df["match_score"]=0
             possible_combinations_grouped_df['all_params']= possible_combinations_grouped_df.apply(lambda row: get_non_hyphen_values(row), axis=1)
             # go through every row of possible_combinations_grouped_df
+            print(f"The size is {possible_combinations_grouped_df.shape[0]}")
+            print(f"The possible_comb is {possible_combinations_grouped_df['all_params']}")
 
             # print(len(possible_combinations_grouped_df))
 
             for index, row_possible_combinations_grouped_df in possible_combinations_grouped_df.iterrows():
                 # print(f"Working on -{row_possible_combinations_grouped_df['all_params']}-")
+                v_df.to_csv("vf_dump.csv",index=False)
+                print(f"The fuzz is {row_possible_combinations_grouped_df['all_params']}")
                 v_df["match_score"]=\
-                    v_df.apply(lambda row: fuzz.ratio(row['all_params'], row_possible_combinations_grouped_df['all_params'])/100, axis=1)
+                    v_df.apply(lambda row: fuzz.ratio(row['all_params'], row_possible_combinations_grouped_df['all_params']), axis=1)
+                v_df.to_csv("vf_dump_after.csv",index=False)
                 
                 top_result=v_df.sort_values(by="match_score", ascending=False).iloc[[0]]
                 top_result['input']=input
@@ -422,11 +433,14 @@ if __name__ == '__main__':
                     merged_df=top_result
                 else:
                     merged_df= pd.concat([merged_df,top_result], ignore_index=True)
+            
+            merged_df=merged_df.sort_values(by="match_score", ascending=False).iloc[[0]]
 
-        print("The Merged DF is vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")      
-        # print(merged_df)  
-        print(f"Columns for {input} are {merged_df.columns}")
-        print("The Merged DF is ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")        
+
+        # print("The Merged DF is vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")      
+        # # print(merged_df)  
+        # print(f"Columns for {input} are {merged_df.columns}")
+        # print("The Merged DF is ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")        
         
         
         
