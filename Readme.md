@@ -1,10 +1,10 @@
-# Fixed Width to CSV Parser
+# Vehicle Name Matcher
 
 The objective of this project is generate a score indicating the possibility of a casually written vehicle name when compared to a data in a database of cars with various attributes.
 
 ## Table of Contents
 
-- [Fixed Width to CSV Parser](#fixed-width-to-csv-parser)
+- [Vehicle Name Matcher](#vehicle-name-matcher)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Running in DB Docker](#running-in-db-docker)
