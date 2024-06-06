@@ -13,6 +13,7 @@ The objective of this project is generate a score indicating the possibility of 
     - [Windows](#windows)
     - [Linux and MacOS](#linux-and-macos)
   - [Running the application](#running-the-application)
+  - [Fine tunning the model](#fine-tunning-the-model)
 
 ## Installation
 
@@ -91,3 +92,13 @@ To run the default parsing with the input and output. After the installation and
 ```bash
    python main.py
 ```
+
+
+## Fine tunning the model
+The model can be fine tuned by modifying the parameters in ***config.py ***
+
+**vehicle_parameter_weightage** : Adjust the weights to be given to the parameters vehicle. This will fine tune as the dataset increases.
+
+**exclude_description_mapping** : Need to add SpaCy valid dependency types that need to be excluded here.
+
+**threshold_mapping** : The threshold mapping scores to be given here, so include or exclude more similarity scores.
